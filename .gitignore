@@ -1,0 +1,5 @@
+gen.dSYM
+build/
+.cache/
+gen
+gen.cpp
