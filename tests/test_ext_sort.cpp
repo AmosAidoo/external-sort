@@ -1,4 +1,3 @@
-#include <_stdio.h>
 #include <cstdint>
 #include <cstdio>
 #include <filesystem>
@@ -7,7 +6,6 @@
 #include <iostream>
 #include <random>
 #include <sys/fcntl.h>
-#include <sys/stat.h>
 #include <unistd.h>
 
 // Contains out external sort function
@@ -62,6 +60,8 @@ protected:
     std::vector<uint8_t> buffer(mem_size);
 
     ssize_t num_read;
+    uint64_t prev_last_value = 0;
+    bool prev_last_value_set = false;
     while (true) {
       num_read = read(fd, buffer.data(), mem_size);
       ASSERT_NE(num_read, -1);
@@ -70,11 +70,16 @@ protected:
         break;
 
       auto arr = reinterpret_cast<uint64_t *>(buffer.data());
+      if (prev_last_value_set) {
+        ASSERT_GE(arr[0], prev_last_value);
+      }
       for (int i = 1; i < num_read / sizeof(uint64_t); i++) {
         std::cout << "Index " << i << ": " << arr[i]
                   << " (previous: " << arr[i - 1] << ")\n";
         ASSERT_GE(arr[i], arr[i - 1]);
       }
+      prev_last_value = arr[num_read / sizeof(uint64_t) - 1];
+      prev_last_value_set = true;
     }
   }
 };
