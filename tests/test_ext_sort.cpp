@@ -63,7 +63,7 @@ protected:
     uint64_t prev_last_value = 0;
     bool prev_last_value_set = false;
     while (true) {
-      num_read = read(fd, buffer.data(), mem_size);
+      num_read = read(fd, buffer.data(), (mem_size / sizeof(uint64_t)) * sizeof(uint64_t));
       ASSERT_NE(num_read, -1);
       
       if (num_read == 0)
@@ -74,8 +74,6 @@ protected:
         ASSERT_GE(arr[0], prev_last_value);
       }
       for (int i = 1; i < num_read / sizeof(uint64_t); i++) {
-        std::cout << "Index " << i << ": " << arr[i]
-                  << " (previous: " << arr[i - 1] << ")\n";
         ASSERT_GE(arr[i], arr[i - 1]);
       }
       prev_last_value = arr[num_read / sizeof(uint64_t) - 1];
